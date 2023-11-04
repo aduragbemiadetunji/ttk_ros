@@ -8,9 +8,9 @@ import math
 
 
 
-ref_roll, ref_yaw, ref_pitch = (0, 0, 0)
+ref_pos_x, ref_pos_y, ref_pos_z, ref_roll, ref_yaw, ref_pitch,  = (0.07, 0.07, 0.4, 0, 0, 0) 
 Kp = 1.8
-throttle = 200
+throttle = 320
 
 actuators_msg = Actuators()
 
@@ -37,29 +37,38 @@ def pose_callback(pose_msg):
     # Extract and print the position and orientation components of the pose
     position = pose_msg.position
     orientation = pose_msg.orientation
+    pos_x, pos_y, pos_z = orientation.x, orientation.y, orientation.z
+    print(pos_x, pos_y)
     quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
     # print("Position: x={}, y={}, z={}".format(position.x, position.y, position.z))
     # print("Orientation: x={}, y={}, z={}, w={}".format(orientation.x, orientation.y, orientation.z, orientation.w))
     roll, pitch, yaw = quaternion_to_euler(*quaternion)
     # print(roll, pitch, yaw)
 
-    err_roll, err_yaw, err_pitch = (ref_roll-roll, ref_yaw-yaw, ref_pitch-pitch)
+    err_pos_x, err_pos_y, err_pos_z, err_roll, err_yaw, err_pitch = (ref_pos_x-pos_x, ref_pos_y-pos_y, ref_pos_z-pos_z, ref_roll-roll, ref_yaw-yaw, ref_pitch-pitch)
 
+
+    pid_pos_x = 100 * err_pos_x
+    pid_pos_y = 100 * err_pos_y
+    pid_pos_z = 100 * err_pos_z
     pid_roll = Kp * err_roll
     pid_yaw = Kp * err_yaw
     pid_pitch = Kp * err_pitch
 
+    pid_xy_offset = pid_pos_x + pid_pos_y
+    # print(pid_pos_z)
+
     # print(pid_roll, pid_pitch, pid_yaw)
     # print(throt_val)
     # print(type(throt_val))
-    throt_new = throttle + throt_val
+    throt_new = throttle + pid_pos_z + throt_val
     # print(throt_new)
 
 
-    motor_one = throt_new - pid_roll + pid_yaw + pid_pitch
-    motor_two = throt_new + pid_roll + pid_yaw - pid_pitch 
-    motor_three = throt_new + pid_roll - pid_yaw + pid_pitch
-    motor_four = throt_new - pid_roll - pid_yaw - pid_pitch
+    motor_one = throt_new - pid_roll + pid_yaw + pid_pitch + pid_xy_offset
+    motor_two = throt_new + pid_roll + pid_yaw - pid_pitch + pid_xy_offset
+    motor_three = throt_new + pid_roll - pid_yaw + pid_pitch + pid_xy_offset
+    motor_four = throt_new - pid_roll - pid_yaw - pid_pitch + pid_xy_offset
 
     # Example angular velocities values
     angular_velocities_values = [motor_one, motor_two, motor_three, motor_four]
