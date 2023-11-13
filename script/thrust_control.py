@@ -38,7 +38,7 @@ def pose_callback(pose_msg):
     position = pose_msg.position
     orientation = pose_msg.orientation
     pos_x, pos_y, pos_z = orientation.x, orientation.y, orientation.z
-    print(pos_x, pos_y)
+    # print(pos_x, pos_y)
     quaternion = (orientation.x, orientation.y, orientation.z, orientation.w)
     # print("Position: x={}, y={}, z={}".format(position.x, position.y, position.z))
     # print("Orientation: x={}, y={}, z={}, w={}".format(orientation.x, orientation.y, orientation.z, orientation.w))
@@ -90,7 +90,7 @@ def subscriber():
 
 
 if __name__ == "__main__":
-    rospy.init_node("Attitude_Regulator")
+    rospy.init_node("Thrust_control")
     motor_publisher = rospy.Publisher("/rmf_obelix/command/motor_speed", Actuators, queue_size=10)
     subscriber()
 

@@ -1,0 +1,4 @@
+<launch>
+  <node respawn="true" pkg="ttk_ros" type="thrust_control.py" name="thrust_control" output="screen"/>
+  <node respawn="true" pkg="ttk_ros" type="throttle_sim.py" name="throttle_sim" output="screen"/>
+</launch>
